@@ -9,7 +9,7 @@ import keyin
 from motor5a import Lmotor, Rmotor
 
 
-udp = sk.UDP_Send("172.16.7.230", 44444)
+udp = sk.UDP_Send("172.16.7.244", 44444)
 
 motorL = Lmotor(17)
 motorR = Rmotor(18)
@@ -41,7 +41,7 @@ if cap.isOpened():
 
 		frame_grayscale = np.dot(np.array(frame), rgb_weight) / 255.
 
-		recognize_area = frame_grayscale[320:,210:430]
+		recognize_area = frame_grayscale[340:,210:430]
 
 		compressed_ra =np.mean(recognize_area, axis=0)
 
@@ -54,20 +54,20 @@ if cap.isOpened():
 		right_direction = np.argmax(directions)
 
 		if right_direction == 5:
-			motorL.run(5)
-			motorR.run(5)
+			udp.send("m0".encode())
+			motorL.run(20)
+			motorR.run(20)
 		elif right_direction < 5:
-			print("turn right " + str(abs(right_direction - 5)))
-			motorL.run(10)
-			motorR.run(-10)
+			udp.send(("l"+str(abs(right_direction-5))).encode())
+			motorL.run(-12)
+			motorR.run(12)
 		elif right_direction > 5:
-			print("turn left " + str(abs(right_direction - 5)))
-			motorL.run(-10)
-			motorR.run(10)
+			udp.send(("r"+str(abs(right_direction-5))).encode())
+			motorL.run(12)
+			motorR.run(-12)
 		else:
 			print("There is something wrong")
 			break
-
 
 		cv2.imshow("nmsl", recognize_area)
 		ch_im = cv2.waitKey(1)
@@ -80,5 +80,3 @@ if cap.isOpened():
 	cap.release()		
 else:
 	print("camera not work")
-	#udp.send("feng hanxuan is sb".encode())
-	#time.sleep(1)
